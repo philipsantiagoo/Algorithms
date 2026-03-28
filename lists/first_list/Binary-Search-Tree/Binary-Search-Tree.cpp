@@ -19,13 +19,23 @@ Node* newNode(int value) {
 }
 
 
+// Finds and returns the smallest node in the BST.
+Node* smallestNode(Node* root) {
+    while (root -> left_subtree != nullptr) {
+        root = root -> left_subtree;
+    }
+
+    return root;
+}
+
+
 // Insertion logic: if the current position is null, creates a new node; if the value is smaller, moves left; if larger, moves right.
 Node* insert(Node* root, int value) {
-    if(root == nullptr) {
+    if   (root == nullptr) {
         return newNode(value);
     }
     
-    if(value < root -> value) {
+    if (value < root -> value) {
         root -> left_subtree = insert(root -> left_subtree, value);
     } else {
         root -> right_subtree = insert(root -> right_subtree, value);
@@ -33,6 +43,60 @@ Node* insert(Node* root, int value) {
 
     return root;
 }
+
+
+
+// Removes a node with the given value from the BST.
+// Handles three cases: no children, one child, and two children.
+Node* remove(Node* root, int value) {
+    // Value not found in the tree.
+    if (root == nullptr) {
+        return nullptr;
+    }
+
+
+    // Value is smaller: move to the left subtree.
+    if (value < root->value) {
+        root->left_subtree = remove(root->left_subtree, value);
+
+
+    // Value is larger: move to the right subtree.
+    } else if (value > root->value) {
+        root->right_subtree = remove(root->right_subtree, value);
+
+
+    // Found the node to remove.
+    } else {
+
+        // Case 1: no children — just delete the node.
+        if (root->left_subtree == nullptr && root->right_subtree == nullptr) {
+            delete root;
+            return nullptr;
+
+        // Case 2a: no left child — replace with right child.
+        } else if (root->left_subtree == nullptr) {
+            Node* temp = root->right_subtree;
+            delete root;
+            return temp;
+
+        // Case 2b: no right child — replace with left child.
+        } else if (root->right_subtree == nullptr) {
+            Node* temp = root->left_subtree;
+            delete root;
+            return temp;
+
+        // Case 3: two children — replace with inorder successor (smallest in right subtree),
+        // then remove the successor from the right subtree.
+        } else {
+            Node* temp = smallestNode(root->right_subtree);
+            root->value = temp->value;
+            root->right_subtree = remove(root->right_subtree, temp->value);
+        }
+    }
+
+    return root;
+}
+
 
 
 // Preorder traversal: visits root, then left subtree, then right subtree.
